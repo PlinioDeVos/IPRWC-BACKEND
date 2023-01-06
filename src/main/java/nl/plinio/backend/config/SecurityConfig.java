@@ -7,8 +7,11 @@ import nl.plinio.backend.endpoints.auth.jwt.CustomUserDetailsService;
 import nl.plinio.backend.endpoints.auth.jwt.JwtAuthenticationFilter;
 import nl.plinio.backend.helper.JwtHelper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.configurationprocessor.json.JSONException;
+import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -25,6 +28,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 
 @Slf4j
@@ -53,6 +58,22 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling().authenticationEntryPoint(((request, response, ex) -> {
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.setStatus(HttpStatus.FORBIDDEN.value());
+                    JSONObject responseObject = new JSONObject();
+
+                    try {
+                        responseObject.put("timestamp", LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
+                        responseObject.put("path", request.getRequestURI());
+                        responseObject.put("status", response.getStatus());
+                        responseObject.put("message", ex.getMessage());
+                        response.getWriter().write(responseObject.toString());
+                    } catch (JSONException jsonException) {
+                        log.error(jsonException.getMessage());
+                    }
+                }))
+                .and()
                 .oauth2ResourceServer(resourceServerConfig -> resourceServerConfig
                         .jwt(jwtConfig -> jwtConfig.decoder(jwtDecoder())
                                 .jwtAuthenticationConverter(authenticationConverter()))
