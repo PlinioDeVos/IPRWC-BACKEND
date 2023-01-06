@@ -4,8 +4,8 @@ import jakarta.validation.constraints.Email;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
 @Getter
+@RequiredArgsConstructor
 public class LoginRequest {
     @Email
     private String email;
