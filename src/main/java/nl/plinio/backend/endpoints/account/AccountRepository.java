@@ -13,4 +13,5 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
     @Override
     List<Account> findAll();
     Optional<Account> findByEmail(String email);
+    boolean existsByEmail(String email);
 }

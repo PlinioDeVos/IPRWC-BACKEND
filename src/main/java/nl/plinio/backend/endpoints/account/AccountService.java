@@ -29,6 +29,10 @@ public class AccountService {
         return accountRepository.findByEmail(email).orElseThrow(() -> new EmailNotFoundException(email));
     }
 
+    public boolean existsByEmail(String email) {
+        return accountRepository.existsByEmail(email);
+    }
+
     public Page<AccountDto> getAllAccounts(int page, int size, String sort) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sort));
         List<AccountDto> accountResponseList = new ArrayList<>();
