@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+@PreAuthorize("hasAuthority('admin')")
 @RestController
 @RequestMapping("account")
 @RequiredArgsConstructor
@@ -26,7 +27,6 @@ public class AccountController {
         return accountService.getAllAccounts(page, size, sort);
     }
 
-    @PreAuthorize("hasAnyAuthority('admin', 'customer')")
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public AccountDto getAccount(@PathVariable UUID id) {
