@@ -29,6 +29,10 @@ public class MockDataGenerator {
 
     @PostConstruct
     public void generate() {
+        if (accountService.getAllAccounts(0, 10, "id").isEmpty()) {
+            return;
+        }
+
         createAdminAccount();
     }
 }
