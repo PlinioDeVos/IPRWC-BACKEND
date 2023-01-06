@@ -1,12 +1,15 @@
 package nl.plinio.backend.endpoints.auth;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import nl.plinio.backend.endpoints.account.AccountService;
 import nl.plinio.backend.endpoints.account.model.Account;
+import nl.plinio.backend.endpoints.account.model.Role;
 import nl.plinio.backend.endpoints.auth.jwt.CookieGenerator;
 import nl.plinio.backend.endpoints.auth.jwt.JwtGenerator;
 import nl.plinio.backend.endpoints.auth.model.LoginDto;
 import nl.plinio.backend.endpoints.auth.model.LoginRequest;
+import nl.plinio.backend.exception.EmailExistsException;
 import nl.plinio.backend.exception.InvalidCredentialsException;
 import nl.plinio.backend.helper.PasswordHelper;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +19,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -41,6 +45,20 @@ public class AuthService {
         String jwt = jwtGenerator.generate(authentication);
 
         return new LoginDto(jwt, account);
+    }
+
+    public LoginDto signup(LoginRequest signupRequest) {
+        if (accountService.existsByEmail(signupRequest.getEmail())) {
+            throw new EmailExistsException(signupRequest.getEmail());
+        }
+
+        Account account = new Account();
+        account.setEmail(signupRequest.getEmail());
+        account.setPassword(signupRequest.getPassword());
+        account.setRole(Role.CUSTOMER);
+        accountService.createAccount(account);
+
+        return login(signupRequest);
     }
 
     public HttpCookie createCookie(String jwt) {
