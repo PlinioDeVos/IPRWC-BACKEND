@@ -45,9 +45,8 @@ public class ProductService {
         existingProduct.setEan(product.getEan());
         existingProduct.setName(product.getName());
         existingProduct.setDescription(product.getDescription());
+        existingProduct.setImage(product.getImage());
         existingProduct.setPrice(product.getPrice());
-        existingProduct.setSalePrice(product.getSalePrice());
-        existingProduct.setVisible(product.isVisible());
         return new ProductDto(productRepository.save(existingProduct));
     }
 

@@ -38,9 +38,6 @@ import java.util.Arrays;
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-    @Value("${jwt.secret}")
-    private String secret;
-
     @Value("${cors.allowed-origins}")
     private String allowedOrigins;
 
@@ -108,7 +105,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    CorsConfigurationSource corsConfigurationSource() {
+    public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         String[] origins = allowedOrigins.split(",");
         configuration.setAllowedOrigins(Arrays.asList(origins));

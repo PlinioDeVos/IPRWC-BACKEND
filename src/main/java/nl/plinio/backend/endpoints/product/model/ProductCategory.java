@@ -1,10 +1,9 @@
 package nl.plinio.backend.endpoints.product.model;
 
 public enum ProductCategory {
-    AIR("air"),
     DISTANCE("distance"),
-    CAMERA("camera"),
-    INFRARED("infrared"),
+    OPTICAL("optical"),
+    SOUD("sound"),
     TEMPERATURE("temperature"),
     TIME("time");
 

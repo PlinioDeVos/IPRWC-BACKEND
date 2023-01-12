@@ -4,7 +4,10 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.Getter;
 import lombok.Setter;
+import nl.plinio.backend.endpoints.cart.model.Cart;
 import nl.plinio.backend.model.BaseEntity;
+
+import java.util.Set;
 
 @Entity
 @Table(name = "accounts")
@@ -18,4 +21,7 @@ public class Account extends BaseEntity {
 
     @Column(columnDefinition = "text")
     private String password;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    private Set<Cart> carts;
 }
