@@ -1,0 +1,65 @@
+name: 'Build and deploy'
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Image version'
+        required: true
+
+env:
+  SSH_GIT: "git@github.com:PlinioDeVos/IPRWC-BACKEND.git"
+  REPO_NAME: ${{ github.event.repository.name }}
+
+jobs:
+  deploy_repo:
+    name: 'Deploy to DigitalOcean'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Check-out repo'
+        uses: actions/checkout@v3
+      - name: 'Get branch name'
+        shell: bash
+        run: echo "::set-env name=BRANCH_NAME::$(echo ${GITHUB_REF#refs/heads/})"
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+      - name: 'Deploy to DigitalOcean droplet via SSH'
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSHKEY }}
+          passphrase: ${{ secrets.PASSPHRASE }}
+          envs: SSH_GIT,REPO_NAME,BRANCH_NAME,GITHUB_SHA
+          script_stop: true
+          script: |
+            # Remove potential leftovers
+            if [ -d "$REPO_NAME" ]; then rm -rf $REPO_NAME; fi
+            
+            # Clone repository
+            git clone -b $BRANCH_NAME $SSH_GIT
+            
+            # Copy .env file
+            cp .env $REPO_NAME
+            
+            # Change directory
+            cd $REPO_NAME
+            
+            # Maven
+            sudo chmod 777 mvnw
+            ./mvnw package -Dmaven.test.skip
+            
+            # Stop Docker containers
+            docker-compose down
+            
+            # Remove unused containers and images
+            docker system prune -a -f
+            
+            # Build Docker containers and start
+            docker-compose up -d
+            
+            # Cleanup
+            cd ..
+            if [ -d "$REPO_NAME" ]; then rm -rf $REPO_NAME; fi
