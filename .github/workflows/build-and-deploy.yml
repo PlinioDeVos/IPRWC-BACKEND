@@ -38,7 +38,8 @@ jobs:
             # Remove potential leftovers
             if [ -d "$REPO_NAME" ]; then rm -rf $REPO_NAME; fi
             
-            # SSH add
+            # Authentication agent
+            eval $(ssh-agent)
             ssh-add ~/.ssh/id_rsa
             
             # Clone repository
