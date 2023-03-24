@@ -36,7 +36,7 @@ jobs:
           script_stop: true
           script: |
             # Remove potential leftovers
-            if [ -d "$REPO_NAME" ]; then rm -rf $REPO_NAME; fi
+            rm -rf $REPO_NAME &>/dev/null
             
             # Clone repository
             git clone -b $BRANCH_NAME $SSH_GIT
