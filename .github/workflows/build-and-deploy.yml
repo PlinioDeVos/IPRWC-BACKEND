@@ -41,9 +41,6 @@ jobs:
             # Clone repository
             git clone -b $BRANCH_NAME $SSH_GIT
             
-            # Copy .env file
-            cp .env $REPO_NAME
-            
             # Change directory
             cd $REPO_NAME
             
