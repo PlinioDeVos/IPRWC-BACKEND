@@ -1,6 +1,5 @@
 package nl.plinio.backend.mock;
 
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nl.plinio.backend.endpoints.account.AccountService;
@@ -12,6 +11,8 @@ import nl.plinio.backend.endpoints.product.ProductService;
 import nl.plinio.backend.endpoints.product.model.Product;
 import nl.plinio.backend.endpoints.product.model.ProductCategory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -28,6 +29,7 @@ public class MockDataGenerator {
     private String adminPassword;
 
     private final AccountService accountService;
+
     private final ProductService productService;
 
     private void generateAccounts() {
@@ -126,11 +128,12 @@ public class MockDataGenerator {
         );
     }
 
-    @PostConstruct
+    @EventListener(ApplicationReadyEvent.class)
     public void generate() {
         if (!accountService.getAllAccounts(0, 10, "id").isEmpty()) return;
         generateAccounts();
         generateProducts();
+        log.info("Successfully generated mock data");
     }
 
     // Creation methods
