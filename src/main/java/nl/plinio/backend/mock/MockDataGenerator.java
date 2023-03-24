@@ -15,8 +15,11 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.util.Objects;
 
 @Slf4j
 @Component
@@ -163,9 +166,15 @@ public class MockDataGenerator {
         }
 
         try {
-            InputStream inputStream = MockDataGenerator.class.getResourceAsStream("/images/" + filename);
-            assert inputStream != null;
-            image.setData(inputStream.readAllBytes());
+            log.info(filename);
+            ClassLoader classLoader = getClass().getClassLoader();
+            File imageFile = new File(Objects.requireNonNull(classLoader.getResource("images/" + filename)).getFile());
+            byte[] imageData = Files.readAllBytes(imageFile.toPath());
+            image.setData(imageData);
+
+//            InputStream inputStream = MockDataGenerator.class.getResourceAsStream("/images/" + filename);
+//            assert inputStream != null;
+//            image.setData(inputStream.readAllBytes());
         } catch (IOException ex) {
             log.error(ex.getMessage());
         }
