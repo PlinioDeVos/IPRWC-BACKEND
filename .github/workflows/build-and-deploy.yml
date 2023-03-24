@@ -39,7 +39,7 @@ jobs:
             rm -rf $REPO_NAME &>/dev/null
             
             # Clone repository
-            git clone -b $BRANCH_NAME $SSH_GIT
+            git clone -b $BRANCH_NAME $SSH_GIT || true
             
             # Change directory
             cd $REPO_NAME
