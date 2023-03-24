@@ -167,7 +167,7 @@ public class MockDataGenerator {
 
         try {
             log.info(filename);
-            InputStream inputStream = MockDataGenerator.class.getClassLoader().getResourceAsStream("images/" + filename);
+            InputStream inputStream = getClass().getResourceAsStream("/BOOT-INF/classes/images/" + filename);
             assert inputStream != null;
             image.setData(inputStream.readAllBytes());
 
@@ -179,7 +179,7 @@ public class MockDataGenerator {
 //            InputStream inputStream = MockDataGenerator.class.getResourceAsStream("/images/" + filename);
 //            assert inputStream != null;
 //            image.setData(inputStream.readAllBytes());
-        } catch (IOException ex) {
+        } catch (IOException | NullPointerException ex) {
             log.error(ex.getMessage());
         }
 
