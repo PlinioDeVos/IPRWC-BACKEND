@@ -36,10 +36,10 @@ jobs:
           script_stop: true
           script: |
             # Remove potential leftovers
-            rm -rf $REPO_NAME &>/dev/null
+            if [ -d "$REPO_NAME" ]; then rm -rf $REPO_NAME; fi
             
             # Clone repository
-            git clone -b $BRANCH_NAME $SSH_GIT || true
+            git clone -b $BRANCH_NAME $SSH_GIT
             
             # Change directory
             cd $REPO_NAME
