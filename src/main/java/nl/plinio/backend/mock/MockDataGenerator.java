@@ -160,7 +160,7 @@ public class MockDataGenerator {
         }
 
         try {
-            InputStream inputStream = getClass().getResourceAsStream("/images/" + filename);
+            InputStream inputStream = MockDataGenerator.class.getResourceAsStream("/images/" + filename);
             assert inputStream != null;
             image.setData(inputStream.readAllBytes());
         } catch (IOException ex) {

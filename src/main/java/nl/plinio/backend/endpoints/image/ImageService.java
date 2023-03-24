@@ -80,7 +80,7 @@ public class ImageService {
         image.setMimeType("images/png");
 
         try {
-            InputStream inputStream = getClass().getResourceAsStream("/images/new-product.png");
+            InputStream inputStream = ImageService.class.getResourceAsStream("/images/new-product.png");
             assert inputStream != null;
             image.setData(inputStream.readAllBytes());
         } catch (IOException ex) {
