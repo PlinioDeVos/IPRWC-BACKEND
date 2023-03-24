@@ -167,10 +167,14 @@ public class MockDataGenerator {
 
         try {
             log.info(filename);
-            ClassLoader classLoader = getClass().getClassLoader();
-            File imageFile = new File(Objects.requireNonNull(classLoader.getResource("images/" + filename)).getFile());
-            byte[] imageData = Files.readAllBytes(imageFile.toPath());
-            image.setData(imageData);
+            InputStream inputStream = MockDataGenerator.class.getClassLoader().getResourceAsStream("images/" + filename);
+            assert inputStream != null;
+            image.setData(inputStream.readAllBytes());
+
+//            ClassLoader classLoader = getClass().getClassLoader();
+//            File imageFile = new File(Objects.requireNonNull(classLoader.getResource("images/" + filename)).getFile());
+//            byte[] imageData = Files.readAllBytes(imageFile.toPath());
+//            image.setData(imageData);
 
 //            InputStream inputStream = MockDataGenerator.class.getResourceAsStream("/images/" + filename);
 //            assert inputStream != null;

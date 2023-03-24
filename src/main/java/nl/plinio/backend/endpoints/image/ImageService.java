@@ -10,13 +10,10 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -83,13 +80,14 @@ public class ImageService {
         image.setMimeType("images/png");
 
         try {
-//            InputStream inputStream = ImageService.class.getResourceAsStream("/images/new-product.png");
-//            assert inputStream != null;
-//            image.setData(inputStream.readAllBytes());
-            ClassLoader classLoader = getClass().getClassLoader();
-            File imageFile = new File(Objects.requireNonNull(classLoader.getResource("images/new-product.png")).getFile());
-            byte[] imageData = Files.readAllBytes(imageFile.toPath());
-            image.setData(imageData);
+            InputStream inputStream = ImageService.class.getResourceAsStream("/images/new-product.png");
+            assert inputStream != null;
+            image.setData(inputStream.readAllBytes());
+
+//            ClassLoader classLoader = getClass().getClassLoader();
+//            File imageFile = new File(Objects.requireNonNull(classLoader.getResource("images/new-product.png")).getFile());
+//            byte[] imageData = Files.readAllBytes(imageFile.toPath());
+//            image.setData(imageData);
         } catch (IOException ex) {
             log.error(ex.getMessage());
         }
