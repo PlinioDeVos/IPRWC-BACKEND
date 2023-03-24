@@ -2,6 +2,7 @@ package nl.plinio.backend.endpoints.product;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import nl.plinio.backend.endpoints.image.ImageService;
 import nl.plinio.backend.endpoints.product.model.Product;
 import nl.plinio.backend.endpoints.product.model.ProductCategory;
 import nl.plinio.backend.endpoints.product.model.ProductDto;
@@ -19,6 +20,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ProductService {
     private final ProductRepository productRepository;
+    private final ImageService imageService;
 
     public Product findProduct(UUID id) {
         return productRepository.findById(id).orElseThrow(() -> new EnitityNotFoundException(Product.class));
@@ -37,7 +39,12 @@ public class ProductService {
     }
 
     public ProductDto createProduct(Product product) {
+        product.setImage(imageService.createNewProductImage(product.getName()));
         return new ProductDto(productRepository.save(product));
+    }
+
+    public void createMockProduct(Product product) {
+        productRepository.save(product);
     }
 
     public ProductDto updateProduct(UUID id, Product product) {

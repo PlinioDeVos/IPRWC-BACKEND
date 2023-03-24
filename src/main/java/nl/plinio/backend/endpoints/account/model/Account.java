@@ -7,8 +7,6 @@ import lombok.Setter;
 import nl.plinio.backend.endpoints.cart.model.Cart;
 import nl.plinio.backend.model.BaseEntity;
 
-import java.util.Set;
-
 @Entity
 @Table(name = "accounts")
 @Getter @Setter
@@ -22,6 +20,6 @@ public class Account extends BaseEntity {
     @Column(columnDefinition = "text")
     private String password;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    private Set<Cart> carts;
+    @OneToOne(cascade = CascadeType.ALL)
+    private Cart cart;
 }

@@ -2,15 +2,22 @@ package nl.plinio.backend.mock;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import nl.plinio.backend.endpoints.account.AccountService;
 import nl.plinio.backend.endpoints.account.model.Account;
 import nl.plinio.backend.endpoints.account.model.Role;
+import nl.plinio.backend.endpoints.cart.model.Cart;
+import nl.plinio.backend.endpoints.image.model.Image;
 import nl.plinio.backend.endpoints.product.ProductService;
 import nl.plinio.backend.endpoints.product.model.Product;
 import nl.plinio.backend.endpoints.product.model.ProductCategory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.io.InputStream;
+
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class MockDataGenerator {
@@ -33,31 +40,31 @@ public class MockDataGenerator {
                 "10128009888",
                 "Ultrasonic Sensor - HC-SR04",
                 "With this ultrasonic sensor you can easily measure a distance.",
-                "https://www.tinytronics.nl/shop/image/cache/catalog/products_2022/ultrasonic-sensor-hc-sr04-front-600x600.jpg",
+                "hc-sr04.jpg",
                 ProductCategory.DISTANCE,
-                3
+                3.4f
         );
         createProduct(
                 "51397119230",
                 "RTC DS3231M Module - I2C",
                 "Easily keep track of time with this RTC (Real Time Clock).",
-                "https://www.tinytronics.nl/shop/image/cache/data/product-3153/rtc-ds3231m-module-i2c-front-600x600w.jpg",
+                "rtc-ds3231m.jpg",
                 ProductCategory.TIME,
-                8
+                8.89f
         );
         createProduct(
                 "62210057845",
                 "Bitcraze Flow Deck V2",
                 "Measure movements in relation to the ground with this optical sensor.",
-                "https://www.tinytronics.nl/shop/image/cache/catalog/products_2022/bitcraze-crazyflie-2.x-flow-deck-v2-600x600.jpg",
+                "bitcraze-flow-deck-v2.jpg",
                 ProductCategory.OPTICAL,
-                58
+                58f
         );
         createProduct(
                 "96486419853",
                 "ASAIR DHT20 Temperature and Humidity Sensor",
                 "A handy temperature and humidity sensor in one.",
-                "https://www.tinytronics.nl/shop/image/cache/catalog/products/product-003752/dht20-temperature-and-humidity-sensor-600x600.jpg",
+                "dht20.jpg",
                 ProductCategory.TEMPERATURE,
                 5.95f
         );
@@ -65,7 +72,7 @@ public class MockDataGenerator {
                 "86514320977",
                 "ASAIR AM2122 Temperature and Humidity Sensor",
                 "A handy temperature and humidity sensor in one.",
-                "https://www.tinytronics.nl/shop/image/cache/catalog/products/product-003753/am2122-temperature-and-humidity-sensor-600x600.jpg",
+                "am2122.jpg",
                 ProductCategory.TEMPERATURE,
                 4.4f
         );
@@ -73,7 +80,7 @@ public class MockDataGenerator {
                 "6548612009",
                 "E18-D80NK Infrared Reflection Sensor",
                 "Measure distance between an object with IR reflection.",
-                "https://www.tinytronics.nl/shop/image/cache/data/product-1139/E18-D80NK%20Infrared%20Reflection%20Sensor%201-600x600.jpg",
+                "e18-d80nk.jpg",
                 ProductCategory.OPTICAL,
                 7.45f
         );
@@ -81,7 +88,7 @@ public class MockDataGenerator {
                 "76998125092",
                 "Optical Reflection Sensor IR TCRT5000",
                 "A combination of an infrared LED and a phototransistor.",
-                "https://www.tinytronics.nl/shop/image/cache/data/product-158/TCRT5000-600x600.JPG",
+                "tcrt5000.jpg",
                 ProductCategory.OPTICAL,
                 1.3f
         );
@@ -89,7 +96,7 @@ public class MockDataGenerator {
                 "54300874910",
                 "Ultrasonic Sensor - US-100",
                 "Measure distances more accurately with the built-in temperature sensor.",
-                "https://www.tinytronics.nl/shop/image/cache/data/product-1873/US-100_1-600x600w.jpg",
+                "us-100.jpg",
                 ProductCategory.DISTANCE,
                 4.8f
         );
@@ -97,24 +104,24 @@ public class MockDataGenerator {
                 "83220985432",
                 "CZN-15E Electret Condenser Microphone",
                 "An omnidirectional electret condenser microphone.",
-                "https://www.tinytronics.nl/shop/image/cache/catalog/products/product-003552/czn-15e-electret-condenser-microphone--600x600.jpg",
-                ProductCategory.SOUD,
+                "czn-15e.jpg",
+                ProductCategory.SOUND,
                 0.5f
         );
         createProduct(
                 "20975391876",
                 "MAX4466 Microphone Amplifier Module",
                 "Easily measure ambient sound with an analog pin on your Arduino.",
-                "https://www.tinytronics.nl/shop/image/cache/data/product-1781/MAX4466MICMOD_voorkant-600x600.png",
-                ProductCategory.SOUD,
+                "max4466.png",
+                ProductCategory.SOUND,
                 2.5f
         );
         createProduct(
                 "79859610422",
                 "Sound Detection Sensor Module",
                 "Detect sound with this module.",
-                "https://www.tinytronics.nl/shop/image/cache/data/product-1781/MAX4466MICMOD_voorkant-600x600.png",
-                ProductCategory.SOUD,
+                "sound-detection-sensor-module.jpg",
+                ProductCategory.SOUND,
                 2.5f
         );
     }
@@ -136,7 +143,31 @@ public class MockDataGenerator {
         account.setEmail(email);
         account.setPassword(password);
         account.setRole(role);
+        account.setCart(new Cart());
         accountService.createAccount(account);
+    }
+
+    private Image createImage(String filename) {
+        Image image = new Image();
+        image.setFilename(filename);
+
+        filename = filename.toLowerCase();
+
+        if (filename.endsWith(".jpg")) {
+            image.setMimeType("image/jpeg");
+        } else if (filename.endsWith(".png")) {
+            image.setMimeType("image/png");
+        }
+
+        try {
+            InputStream inputStream = getClass().getResourceAsStream("/images/" + filename);
+            assert inputStream != null;
+            image.setData(inputStream.readAllBytes());
+        } catch (IOException ex) {
+            log.error(ex.getMessage());
+        }
+
+        return image;
     }
 
     private void createProduct(
@@ -151,9 +182,10 @@ public class MockDataGenerator {
         product.setEan(ean);
         product.setName(name);
         product.setDescription(description);
-        product.setImage(image);
         product.setCategory(category);
         product.setPrice(price);
-        productService.createProduct(product);
+        product.setImage(createImage(image));
+
+        productService.createMockProduct(product);
     }
 }

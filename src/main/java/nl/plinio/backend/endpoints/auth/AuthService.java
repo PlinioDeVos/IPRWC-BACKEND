@@ -1,5 +1,6 @@
 package nl.plinio.backend.endpoints.auth;
 
+import com.nimbusds.jose.proc.BadJWSException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nl.plinio.backend.endpoints.account.AccountService;
@@ -9,14 +10,17 @@ import nl.plinio.backend.endpoints.auth.jwt.CookieGenerator;
 import nl.plinio.backend.endpoints.auth.jwt.JwtGenerator;
 import nl.plinio.backend.endpoints.auth.model.LoginDto;
 import nl.plinio.backend.endpoints.auth.model.LoginRequest;
-import nl.plinio.backend.exception.EmailExistsException;
+import nl.plinio.backend.exception.EntityExistsException;
 import nl.plinio.backend.exception.InvalidCredentialsException;
+import nl.plinio.backend.exception.JwtExpiredException;
+import nl.plinio.backend.helper.JwtHelper;
 import nl.plinio.backend.helper.PasswordHelper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -28,6 +32,7 @@ public class AuthService {
 
     private final AccountService accountService;
     private final JwtGenerator jwtGenerator;
+    private final JwtHelper jwtHelper;
     private final CookieGenerator cookieGenerator;
     private final AuthenticationManager authenticationManager;
     private final PasswordHelper passwordHelper;
@@ -49,7 +54,8 @@ public class AuthService {
 
     public LoginDto signup(LoginRequest signupRequest) {
         if (accountService.existsByEmail(signupRequest.getEmail())) {
-            throw new EmailExistsException(signupRequest.getEmail());
+            throw new EntityExistsException(
+                    "An entity with the e-mail '" + signupRequest.getEmail() + "' already exists.");
         }
 
         Account account = new Account();
@@ -68,5 +74,11 @@ public class AuthService {
 
     public HttpCookie createCookie(String jwt, long cookieLifetimeInS) {
         return cookieGenerator.generate(jwt, cookieLifetimeInS);
+    }
+
+    public void validateJwt(String jwt) {
+        if (jwtHelper.isJwtExpired(jwt)) {
+            throw new JwtExpiredException();
+        }
     }
 }

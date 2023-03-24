@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nl.plinio.backend.endpoints.account.model.Account;
 import nl.plinio.backend.endpoints.account.model.AccountDto;
+import nl.plinio.backend.endpoints.cart.model.Cart;
 import nl.plinio.backend.exception.EmailNotFoundException;
 import nl.plinio.backend.exception.EnitityNotFoundException;
 import nl.plinio.backend.helper.PasswordHelper;
@@ -43,6 +44,7 @@ public class AccountService {
 
     public AccountDto createAccount(Account account) {
         Account hashedAccount = passwordHelper.hashAccount(account);
+        hashedAccount.setCart(new Cart());
         return new AccountDto(accountRepository.save(hashedAccount));
     }
 

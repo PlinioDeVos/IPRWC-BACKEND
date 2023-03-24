@@ -9,11 +9,9 @@ import java.util.UUID;
 public class CartDto {
     UUID id;
     AccountDto account;
-    boolean finalised;
 
     public CartDto(Cart cart) {
         this.id = cart.getId();
         this.account = new AccountDto(cart.getAccount());
-        this.finalised = cart.isFinalised();
     }
 }

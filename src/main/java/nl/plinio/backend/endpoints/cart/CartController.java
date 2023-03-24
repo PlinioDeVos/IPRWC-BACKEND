@@ -3,7 +3,7 @@ package nl.plinio.backend.endpoints.cart;
 import lombok.RequiredArgsConstructor;
 import nl.plinio.backend.endpoints.cart.model.Cart;
 import nl.plinio.backend.endpoints.cart.model.CartDto;
-import nl.plinio.backend.endpoints.item.model.ItemDto;
+import nl.plinio.backend.endpoints.cartitem.model.CartItemDto;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -58,30 +58,30 @@ public class CartController {
     }
 
     @PreAuthorize("hasAnyAuthority('customer', 'admin')")
-    @DeleteMapping("/empty")
+    @DeleteMapping("/content/empty")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void emptyCart() {
         cartService.emptyCart();
     }
 
     @PreAuthorize("hasAnyAuthority('customer', 'admin')")
-    @GetMapping("/items")
+    @GetMapping("/content")
     @ResponseStatus(HttpStatus.OK)
-    public List<ItemDto> getAllCartItems() {
+    public List<CartItemDto> getAllCartItems() {
         return cartService.getAllCartItems();
     }
 
     @PreAuthorize("hasAnyAuthority('customer', 'admin')")
-    @PostMapping("/items/{productId}")
+    @PostMapping("/content/{productId}")
     @ResponseStatus(HttpStatus.OK)
-    public ItemDto addItemToCart(@PathVariable UUID productId) {
-        return cartService.addItemToCart(productId);
+    public CartItemDto addProductToCart(@PathVariable UUID productId) {
+        return cartService.addProductToCart(productId);
     }
 
     @PreAuthorize("hasAnyAuthority('customer', 'admin')")
-    @DeleteMapping("/items/{id}")
+    @DeleteMapping("/content/{productId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteItemFromCart(@PathVariable UUID id) {
-        cartService.deleteItemFromCart(id);
+    public void deleteProductFromCart(@PathVariable UUID productId) {
+        cartService.deleteProductFromCart(productId);
     }
 }

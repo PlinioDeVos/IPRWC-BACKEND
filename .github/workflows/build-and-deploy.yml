@@ -51,14 +51,15 @@ jobs:
             sudo chmod 777 mvnw
             ./mvnw package -Dmaven.test.skip
             
-            # Stop Docker containers
-            docker-compose down
+            # Stop Docker container
+            docker stop iprwc-backend &>/dev/null
             
             # Remove unused containers and images
-            docker system prune -a -f
+            docker rm iprwc-backend &>/dev/null
             
             # Build Docker containers and start
-            docker-compose up -d
+            docker build -t api .
+            docker run -d --name iprwc-backend api
             
             # Cleanup
             cd ..

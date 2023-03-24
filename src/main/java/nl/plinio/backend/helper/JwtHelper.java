@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import javax.crypto.spec.SecretKeySpec;
+import java.time.Instant;
+import java.util.Date;
 
 @Slf4j
 @Component
@@ -36,6 +38,17 @@ public class JwtHelper {
     public Jwt decode(String jwt) {
         JwtDecoder jwtDecoder = jwtDecoder();
         return jwtDecoder.decode(jwt);
+    }
+
+    public boolean isJwtExpired(String jwt) {
+        Jwt decodedJwt = decode(jwt);
+        Instant expiresAt = decodedJwt.getExpiresAt();
+
+        if (expiresAt != null) {
+            return Instant.now().isAfter(expiresAt);
+        }
+
+        return true;
     }
 
     public boolean isValidJwt(String jwt) {

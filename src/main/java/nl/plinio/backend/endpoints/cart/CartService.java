@@ -2,16 +2,15 @@ package nl.plinio.backend.endpoints.cart;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import nl.plinio.backend.endpoints.account.model.Account;
 import nl.plinio.backend.endpoints.cart.model.Cart;
 import nl.plinio.backend.endpoints.cart.model.CartDto;
-import nl.plinio.backend.endpoints.item.ItemService;
-import nl.plinio.backend.endpoints.item.model.Item;
-import nl.plinio.backend.endpoints.item.model.ItemDto;
+import nl.plinio.backend.endpoints.cartitem.CartItemService;
+import nl.plinio.backend.endpoints.cartitem.model.CartItem;
+import nl.plinio.backend.endpoints.cartitem.model.CartItemDto;
 import nl.plinio.backend.endpoints.product.ProductService;
 import nl.plinio.backend.endpoints.product.model.Product;
 import nl.plinio.backend.exception.EnitityNotFoundException;
-import nl.plinio.backend.helper.RelationHelper;
+import nl.plinio.backend.helper.CartHelper;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
@@ -25,8 +24,8 @@ import java.util.UUID;
 public class CartService {
     private final CartRepository cartRepository;
     private final ProductService productService;
-    private final ItemService itemService;
-    private final RelationHelper relationHelper;
+    private final CartItemService cartItemService;
+    private final CartHelper cartHelper;
 
     public Cart findCart(UUID id) {
         return cartRepository.findById(id).orElseThrow(() -> new EnitityNotFoundException(Cart.class));
@@ -46,7 +45,7 @@ public class CartService {
 
     public CartDto updateCart(UUID id, Cart cart) {
         Cart existingCart = findCart(id);
-        existingCart.setFinalised(cart.isFinalised());
+        existingCart.setAccount(cart.getAccount());
         return new CartDto(cartRepository.save(existingCart));
     }
 
@@ -59,49 +58,34 @@ public class CartService {
     }
 
     public void emptyCart() {
-        List<Item> items = itemService.getAllByCartId(getAccountCart().getId());
-
-        if (!items.isEmpty()) {
-            for (Item item : items) {
-                itemService.deleteItem(item.getId());
-            }
-        }
+        cartItemService.deleteAllByCartId(cartHelper.getCartId());
     }
 
-    public List<ItemDto> getAllCartItems() {
-        List<Item> existingItems = itemService.getAllByCartId(getAccountCart().getId());
-        List<ItemDto> items = new ArrayList<>();
-        existingItems.forEach(item -> items.add(new ItemDto(item)));
+    public List<CartItemDto> getAllCartItems() {
+        List<CartItem> existingCartItems = cartItemService.getAllByCartId(cartHelper.getCartId());
+        List<CartItemDto> items = new ArrayList<>();
+        existingCartItems.forEach(item -> items.add(new CartItemDto(item)));
         return items;
     }
 
-    public ItemDto addItemToCart(UUID productId) {
-        final Product product = productService.findProduct(productId);
-        Item item = new Item();
-        item.setBuyPrice(product.getPrice()); // A buy price to ensure the order price will not change with the product price.
-        item.setProduct(product);
-        item.setCart(getAccountCart());
+    public CartItemDto addProductToCart(UUID productId) {
+        Product product = productService.findProduct(productId);
+        CartItem cartItem = cartItemService.findCartItemByProductId(productId);
 
-        return itemService.createItem(item);
-    }
-
-    public void deleteItemFromCart(UUID id) {
-        itemService.deleteItem(id);
-    }
-
-    private Cart getAccountCart() {
-        final Account account = relationHelper.getAccount();
-        List<Cart> carts = cartRepository.findAllByAccountId(account.getId());
-
-        for (Cart cart : carts) {
-            if (!cart.isFinalised()) {
-                return cart;
-            }
+        if (cartItem != null) {
+            cartItem.setQuantity(cartItem.getQuantity() + 1);
+            return cartItemService.updateCartItem(cartItem.getId(), cartItem);
         }
 
-        Cart cart = new Cart();
-        cart.setAccount(account);
-        cart.setFinalised(false);
-        return cartRepository.save(cart);
+        cartItem = new CartItem();
+        cartItem.setQuantity(1);
+        cartItem.setProduct(product);
+        cartItem.setCart(cartHelper.getCart());
+        return cartItemService.createCartItem(cartItem);
+    }
+
+    public void deleteProductFromCart(UUID productId) {
+        CartItem cartItem = cartItemService.findCartItemByProductId(productId);
+        cartItemService.deleteCartItem(cartItem.getId());
     }
 }
