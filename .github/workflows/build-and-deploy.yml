@@ -49,10 +49,10 @@ jobs:
             ./mvnw package -Dmaven.test.skip &>/dev/null
 
             # Stop Docker containers
-            docker stop iprwc-api iprwc-postgres
-            docker rm iprwc-api iprwc-postgres
-            docker volume rm $(docker volume ls -q -f name=iprwc-api -f name=iprwc-postgres)
-            docker network rm $(docker volume ls -q -f name=iprwc-api -f name=iprwc-postgres)
+            docker stop iprwc-api iprwc-postgres &>/dev/null
+            docker rm iprwc-api iprwc-postgres &>/dev/null
+            docker volume rm $(docker volume ls -q -f name=iprwc-api -f name=iprwc-postgres) &>/dev/null
+            docker network rm $(docker volume ls -q -f name=iprwc-api -f name=iprwc-postgres) &>/dev/null
   
             # Build Docker containers and start
             docker compose up -d
