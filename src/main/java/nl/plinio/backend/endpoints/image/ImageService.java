@@ -80,15 +80,10 @@ public class ImageService {
         image.setMimeType("images/png");
 
         try {
-            InputStream inputStream = ImageService.class.getResourceAsStream("/images/new-product.png");
+            InputStream inputStream = getClass().getResourceAsStream("/BOOT-INF/classes/images/new-product.png");
             assert inputStream != null;
             image.setData(inputStream.readAllBytes());
-
-//            ClassLoader classLoader = getClass().getClassLoader();
-//            File imageFile = new File(Objects.requireNonNull(classLoader.getResource("images/new-product.png")).getFile());
-//            byte[] imageData = Files.readAllBytes(imageFile.toPath());
-//            image.setData(imageData);
-        } catch (IOException ex) {
+        } catch (IOException | NullPointerException ex) {
             log.error(ex.getMessage());
         }
 

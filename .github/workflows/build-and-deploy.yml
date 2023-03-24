@@ -41,23 +41,22 @@ jobs:
             # Clone repository
             git clone -b $BRANCH_NAME $SSH_GIT
             
-#            # Change directory
-#            cd $REPO_NAME
-#
-#            # Maven
-#            sudo chmod 777 mvnw
-#            ./mvnw package -Dmaven.test.skip
-#
-#            # Stop Docker container
-#            docker stop iprwc-backend &>/dev/null
-#
-#            # Remove unused containers and images
-#            docker rm iprwc-backend &>/dev/null
-#
-#            # Build Docker containers and start
-#            docker build -t api .
-#            docker run -d --name iprwc-backend api
-#
-#            # Cleanup
-#            cd ..
-#            if [ -d "$REPO_NAME" ]; then rm -rf $REPO_NAME; fi
+            # Change directory
+            cd $REPO_NAME
+
+            # Maven
+            sudo chmod 777 mvnw
+            ./mvnw package -Dmaven.test.skip &>/dev/null
+
+            # Stop Docker containers
+            docker stop iprwc-api iprwc-postgres
+            docker rm iprwc-api iprwc-postgres
+            docker volume rm $(docker volume ls -q -f name=iprwc-api -f name=iprwc-postgres)
+            docker network rm $(docker volume ls -q -f name=iprwc-api -f name=iprwc-postgres)
+  
+            # Build Docker containers and start
+            docker compose up -d
+
+            # Cleanup
+            cd ..
+            if [ -d "$REPO_NAME" ]; then rm -rf $REPO_NAME; fi
